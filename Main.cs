@@ -10,8 +10,9 @@ namespace CoasterAnarchy
 
         public void onEnabled()
         {
+            Global.NO_TRACKBUILDER_RESTRICTIONS = true;
             GameObject lsmFin = TrackRideHelper.GetTrackedRide("Floorless Coaster").meshGenerator.lsmFinGO;
-            SpecialSegmentsList specials = TrackRideHelper.GetTrackedRide("Floorless Coaster").specialSegments;
+            SpecialSegmentsList specials = TrackRideHelper.GetTrackedRide("Steel Coaster").specialSegments;
             CoasterCarInstantiator[] carTypes = { };
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
@@ -35,6 +36,7 @@ namespace CoasterAnarchy
                     if (ride.getUnlocalizedName().Contains("Coaster"))
                     {
                         ride.canHaveBrakes = true;
+                        ride.canHaveBlockBrakes = true;
                     }
                     ride.canHaveHoldingBrakes = true;
                     if (ride.getUnlocalizedName().Contains("Coaster") || ride.everyUpIsLift)
@@ -49,14 +51,22 @@ namespace CoasterAnarchy
                     ride.maxDeltaHeightForLift = float.MaxValue;
                     ride.maxDeltaHeightPerUnit = float.MaxValue;
                     ride.maxDeltaHeightUp = float.MaxValue;
-                    ride.maxLiftSpeed = float.MaxValue;
+                    ride.maxLiftSpeed = 100f;
                     ride.maxSupportHeight = int.MaxValue;
                     ride.meshGenerator.lsmFinGO = lsmFin;
                     ride.min90CurveSize = 1;
                     ride.minHalfHelixSize = 1;
-                    if (ride.getUnlocalizedName() != "Hydraulically-Launched Coaster")
+                    foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
                     {
-                        ride.specialSegments = specials;
+                        Debug.Log(segment.name);
+                        if (segment.segmentPrefab.GetType() == typeof(HalfLoopUp))
+                        {
+                        }
+                        Debug.Log(segment.segmentPrefab.canControlBanking());
+                        if (segment.name != "Splashdown" && segment.name != "HydraulicLaunchSystem")
+                        {
+                            ride.specialSegments.addSpecialSegment(segment);
+                        }
                     }
                     ride.carTypes = ride.carTypes.Union(carTypes).ToArray();
                 }
