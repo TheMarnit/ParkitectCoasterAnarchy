@@ -16,7 +16,6 @@ namespace CoasterAnarchy
             originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
             Global.NO_TRACKBUILDER_RESTRICTIONS = true;
             GameObject lsmFin = TrackRideHelper.GetTrackedRide("Floorless Coaster").meshGenerator.lsmFinGO;
-            SpecialSegmentsList specials = TrackRideHelper.GetTrackedRide("Steel Coaster").specialSegments;
             CoasterCarInstantiator[] carTypes = { };
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
@@ -32,6 +31,18 @@ namespace CoasterAnarchy
                 TrackedRide originalRide = new TrackedRide();
                 if (ride != null)
                 {
+                    originalRide.canBuildRideCamera = ride.canBuildRideCamera;
+                    ride.canBuildRideCamera = true;
+                    originalRide.canChangeSpinLock = ride.canChangeSpinLock;
+                    ride.canChangeSpinLock = true;
+                    originalRide.canBuildMagneticKickers = ride.canBuildMagneticKickers;
+                    ride.canBuildMagneticKickers = true;
+                    originalRide.canBuildSlopeTransitionBrakes = ride.canBuildSlopeTransitionBrakes;
+                    ride.canBuildSlopeTransitionBrakes = true;
+                    originalRide.maxSegmentWidth = ride.maxSegmentWidth;
+                    ride.maxSegmentWidth = 10f;
+                    originalRide.canAdjustLiftSpeeds = ride.canAdjustLiftSpeeds;
+                    ride.canAdjustLiftSpeeds = true;
                     originalRide.canAdjustLiftSpeeds = ride.canAdjustLiftSpeeds;
                     ride.canAdjustLiftSpeeds = true;
                     originalRide.canHaveLSM = ride.canHaveLSM;
@@ -139,6 +150,11 @@ namespace CoasterAnarchy
                     ride.min90CurveSize = originalSettings[ride.getUnlocalizedName()].min90CurveSize;
                     ride.minHalfHelixSize = originalSettings[ride.getUnlocalizedName()].minHalfHelixSize;
                     ride.carTypes = originalSettings[ride.getUnlocalizedName()].carTypes;
+                    ride.canBuildRideCamera = originalSettings[ride.getUnlocalizedName()].canBuildRideCamera;
+                    ride.canChangeSpinLock = originalSettings[ride.getUnlocalizedName()].canChangeSpinLock;
+                    ride.canBuildMagneticKickers = originalSettings[ride.getUnlocalizedName()].canBuildMagneticKickers;
+                    ride.canBuildSlopeTransitionBrakes = originalSettings[ride.getUnlocalizedName()].canBuildSlopeTransitionBrakes;
+                    ride.maxSegmentWidth = originalSettings[ride.getUnlocalizedName()].maxSegmentWidth;
                     foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
                     {
                         ride.specialSegments.removeSpecialSegment(segment);
