@@ -22,7 +22,7 @@ namespace CoasterAnarchy
                 var ride = current as TrackedRide;
                 if (ride != null)
                 {
-                    carTypes = carTypes.Union(ride.carTypes).ToArray();
+                    carTypes = carTypes.Union(ScriptableSingleton<AssetManager>.Instance.getCoasterCarInstantiatorsFor(ride.getReferenceName())).ToArray();
                 }
             }
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
@@ -41,8 +41,6 @@ namespace CoasterAnarchy
                     ride.canBuildSlopeTransitionBrakes = true;
                     originalRide.maxSegmentWidth = ride.maxSegmentWidth;
                     ride.maxSegmentWidth = 10f;
-                    originalRide.canAdjustLiftSpeeds = ride.canAdjustLiftSpeeds;
-                    ride.canAdjustLiftSpeeds = true;
                     originalRide.canAdjustLiftSpeeds = ride.canAdjustLiftSpeeds;
                     ride.canAdjustLiftSpeeds = true;
                     originalRide.canHaveLSM = ride.canHaveLSM;
