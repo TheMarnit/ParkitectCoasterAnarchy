@@ -5,6 +5,7 @@ using System.Linq;
 using TrackedRiderUtility;
 using UnityEngine;
 using MiniJSON;
+using System.Timers;
 
 namespace CoasterAnarchy
 {
@@ -14,7 +15,7 @@ namespace CoasterAnarchy
         Dictionary<string, List<SpecialSegmentSettings>> originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
         private StreamWriter sw;
         private int i;
-        private string modVersion = "2.1";
+        private string modVersion = "2.2";
         private double settingsVersion = 1.1;
         private double dictionaryVersion = 1.1;
         public Dictionary<string, object> anarchy_settings;
@@ -25,6 +26,7 @@ namespace CoasterAnarchy
         private Type type;
         private int result;
         private bool isenabled = false;
+        private bool firstEnabling = true;
         public CoasterCarInstantiator[] carTypes = { };
         GameObject lsmFin;
 
@@ -82,6 +84,21 @@ namespace CoasterAnarchy
         }
 
         public void onEnabled()
+        {
+            if(firstEnabling == true)
+            {
+                Timer timer = new Timer(5000);
+                timer.Elapsed += enable;
+                timer.AutoReset = false;
+                timer.Enabled = true;
+            }
+            else {
+                enable(null, null);
+            }
+            firstEnabling = false;
+        }
+
+        public void enable(object source, ElapsedEventArgs e)
         {
             isenabled = true;
             createRevertSettings();
@@ -267,8 +284,9 @@ namespace CoasterAnarchy
                         ride.maxBankingAngle = 180;
                     }
                     if (settings_bool["allowLiftHills"] == true)
-                    { 
-                        if (ride.getUnlocalizedName().Contains("Coaster") || ride.everyUpIsLift)
+                    {
+                        Debug.Log(ride.getUnlocalizedName());
+                        if (ride.getUnlocalizedName().ToLower().Contains("coaster") || ride.everyUpIsLift)
                         {
                             ride.canHaveLifts = true;
                         }
@@ -401,7 +419,6 @@ namespace CoasterAnarchy
             GUILayout.EndHorizontal();
         }
 
-
         public void onSettingsOpened()
         {
             LoadSettings();
@@ -453,7 +470,6 @@ namespace CoasterAnarchy
             sw.Flush();
             sw.Close();
         }
-
 
         public void generateSettingsFile()
         {
