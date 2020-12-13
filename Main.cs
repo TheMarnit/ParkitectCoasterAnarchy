@@ -9,13 +9,12 @@ using System.Timers;
 
 namespace CoasterAnarchy
 {
-    public class Main : IMod, IModSettings
+    public class Main : AbstractMod, IModSettings
     {
         Dictionary<string, TrackedRide> originalSettings = new Dictionary<string, TrackedRide>();
         Dictionary<string, List<SpecialSegmentSettings>> originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
         private StreamWriter sw;
         private int i;
-        private string modVersion = "2.2";
         private double settingsVersion = 1.1;
         private double dictionaryVersion = 1.1;
         public Dictionary<string, object> anarchy_settings;
@@ -26,7 +25,6 @@ namespace CoasterAnarchy
         private Type type;
         private int result;
         private bool isenabled = false;
-        private bool firstEnabling = true;
         public CoasterCarInstantiator[] carTypes = { };
         GameObject lsmFin;
 
@@ -83,19 +81,9 @@ namespace CoasterAnarchy
             }
         }
 
-        public void onEnabled()
+        public override void onEnabled()
         {
-            if(firstEnabling == true)
-            {
-                Timer timer = new Timer(5000);
-                timer.Elapsed += enable;
-                timer.AutoReset = false;
-                timer.Enabled = true;
-            }
-            else {
-                enable(null, null);
-            }
-            firstEnabling = false;
+            enable(null, null);
         }
 
         public void enable(object source, ElapsedEventArgs e)
@@ -105,7 +93,7 @@ namespace CoasterAnarchy
             applyChangedSettings();
         }
 
-        public void onDisabled()
+        public override void onDisabled()
         {
             isenabled = false;
             revertAllSettings();
@@ -398,7 +386,7 @@ namespace CoasterAnarchy
             GUILayout.EndVertical();
             GUILayout.FlexibleSpace();
             GUILayout.BeginVertical();
-            GUILayout.Label(modVersion, displayStyle, GUILayout.Height(30));
+            GUILayout.Label(getVersionNumber(), displayStyle, GUILayout.Height(30));
             GUILayout.Label(" \n ", displayStyle, GUILayout.Height(30));
             foreach (KeyValuePair<string, object> S in anarchy_settings)
             {
@@ -565,11 +553,19 @@ namespace CoasterAnarchy
             }
         }
 
-        public string Name => "Coaster Anarchy";
+        public override string getName() { return "Coaster Anarchy"; }
 
-        public string Description => "Allows more track pieces on more coasters...";
+        public override string getDescription() { return "Allows more track pieces on more coasters..."; }
 
-        string IMod.Identifier => "Marnit@ParkitectCoasterAnarchy";
+        public override string getIdentifier() { return "Marnit@ParkitectCoasterAnarchy"; }
+
+        public override string getVersionNumber() { return "2.3.0"; }
+
+        public override bool isMultiplayerModeCompatible() { return true; }
+
+        public override bool isRequiredByAllPlayersInMultiplayerMode() { return false; }
+
+        public override int getOrderPriority() { return 9999; }
 
         public string Path { get { return System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Parkitect/Mods/CoasterAnarchySettings"; } }
     }
