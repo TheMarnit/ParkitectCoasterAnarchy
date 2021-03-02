@@ -25,9 +25,17 @@ namespace CoasterAnarchy
         private Type type;
         private int result;
         private bool isenabled = false;
+        private bool ismultiplayer = false;
         public CoasterCarInstantiator[] carTypes = { };
         GameObject lsmFin;
-
+        private List<string> syncedsettings = new List<string> {
+            "allowDeltaHeight",
+            "allowTightHelix",
+            "allowSteepLifts",
+            "allowSteepHills",
+            "allowSteepDrops",
+            "allowTightTurns"
+        };
         public Main()
         {
             LoadSettings();
@@ -83,6 +91,10 @@ namespace CoasterAnarchy
 
         public override void onEnabled()
         {
+            if (CommandController.Instance.isInMultiplayerMode())
+            {
+                ismultiplayer = true;
+            }
             enable(null, null);
         }
 
@@ -161,9 +173,20 @@ namespace CoasterAnarchy
             }
         }
 
+        public bool settingEnabled(string name)
+        {
+            if (syncedsettings.Contains(name))
+            {
+                return true;
+            }
+            else {
+                return settings_bool[name];
+            }
+        }
+
         public void applyChangedSettings()
         {
-            if (settings_bool["noBuildRestrictions"] == true)
+            if (settingEnabled("noBuildRestrictions"))
             {
                 Global.NO_TRACKBUILDER_RESTRICTIONS = true;
             }
@@ -174,43 +197,43 @@ namespace CoasterAnarchy
                 if (ride != null)
                 {
 
-                    if (settings_bool["allowVerticalDirectionSwap"] == true)
+                    if(settingEnabled("allowVerticalDirectionSwap"))
                     {
                         ride.canChangeDirectionAngle = true;
                     }
-                    if (settings_bool["allowVerticalCurve"] == true)
+                    if(settingEnabled("allowVerticalCurve"))
                     {
                         ride.canCurveVertical = true;
                     }
-                    if (settings_bool["allowDeltaHeight"] == true)
+                    if(settingEnabled("allowDeltaHeight"))
                     {
                         ride.maxDeltaHeightPerUnit = float.MaxValue;
                     }
-                    if (settings_bool["allowTightHelix"] == true)
+                    if(settingEnabled("allowTightHelix"))
                     {
                         ride.minHalfHelixSize = 1;
                     }
-                    if (settings_bool["allowSteepLifts"] == true)
+                    if(settingEnabled("allowSteepLifts"))
                     {
                         ride.maxDeltaHeightForLift = float.MaxValue;
                     }
-                    if (settings_bool["allowSteepHills"] == true)
+                    if(settingEnabled("allowSteepHills"))
                     {
                         ride.maxDeltaHeightUp = float.MaxValue;
                     }
-                    if (settings_bool["allowSteepDrops"] == true)
+                    if(settingEnabled("allowSteepDrops"))
                     {
                         ride.maxDeltaHeightDown = float.MaxValue;
                     }
-                    if (settings_bool["allowTrackCrests"] == true)
+                    if(settingEnabled("allowTrackCrests"))
                     {
                         ride.canInvertSlopes = true;
                     }
-                    if (settings_bool["allowCurvedSlopes"] == true)
+                    if(settingEnabled("allowCurvedSlopes"))
                     {
                         ride.canCurveSlopes = true;
                     }
-                    if (settings_bool["allowBrakes"] == true)
+                    if(settingEnabled("allowBrakes"))
                     {
                         if (ride.getUnlocalizedName().Contains("Coaster"))
                         {
@@ -218,60 +241,60 @@ namespace CoasterAnarchy
                             ride.canHaveBlockBrakes = true;
                         }
                     }
-                    if (settings_bool["changeLiftSpeedLimit"] == true)
+                    if(settingEnabled("changeLiftSpeedLimit"))
                     {
                        ride.canAdjustLiftSpeeds = true;
                        ride.maxLiftSpeed = float.Parse(settings_string["liftSpeedLimit"]);
                     }
-                    if (settings_bool["changeSegmentWidth"] == true)
+                    if(settingEnabled("changeSegmentWidth"))
                     {
                         ride.maxSegmentWidth = float.Parse(settings_string["segmentWidth"]); ;
                     }
-                    if (settings_bool["allowHoldingBrakes"] == true)
+                    if(settingEnabled("allowHoldingBrakes"))
                     {
                         ride.canHaveHoldingBrakes = true;
                     }
-                    if (settings_bool["allowCarRotation"] == true)
+                    if(settingEnabled("allowCarRotation"))
                     {
                         ride.canChangeCarRotation = true;
                     }
-                    if (settings_bool["allowTightTurns"] == true)
+                    if(settingEnabled("allowTightTurns"))
                     {
                         ride.min90CurveSize = 1;
                     }
-                    if (settings_bool["unlimitedHeight"] == true)
+                    if(settingEnabled("unlimitedHeight"))
                     {
                         ride.maxSupportHeight = int.MaxValue;
                     }
-                    if (settings_bool["allowCurvedLifts"] == true)
+                    if(settingEnabled("allowCurvedLifts"))
                     {
                         ride.canCurveLifts = true;
                     }
-                    if (settings_bool["allowLapsChange"] == true)
+                    if(settingEnabled("allowLapsChange"))
                     {
                         ride.canChangeLaps = true;
                     }
-                    if (settings_bool["allowRideCamera"] == true)
+                    if(settingEnabled("allowRideCamera"))
                     {
                         ride.canBuildRideCamera = true;
                     }
-                    if (settings_bool["allowSpinLock"] == true)
+                    if(settingEnabled("allowSpinLock"))
                     {
                         ride.canChangeSpinLock = true;
                     }
-                    if (settings_bool["allowMagnetickKickers"] == true)
+                    if(settingEnabled("allowMagnetickKickers"))
                     {
                         ride.canBuildMagneticKickers = true;
                     }
-                    if (settings_bool["allowSlopeTransitionBrakes"] == true)
+                    if(settingEnabled("allowSlopeTransitionBrakes"))
                     {
                         ride.canBuildSlopeTransitionBrakes = true;
                     }
-                    if (settings_bool["allowBanking"] == true)
+                    if(settingEnabled("allowBanking"))
                     {
                         ride.maxBankingAngle = 180;
                     }
-                    if (settings_bool["allowLiftHills"] == true)
+                    if(settingEnabled("allowLiftHills"))
                     {
                         Debug.Log(ride.getUnlocalizedName());
                         if (ride.getUnlocalizedName().ToLower().Contains("coaster") || ride.everyUpIsLift)
@@ -280,7 +303,7 @@ namespace CoasterAnarchy
                         }
                         ride.everyUpIsLift = false;
                     }
-                    if (settings_bool["allowLSM"] == true)
+                    if(settingEnabled("allowLSM"))
                     {
                         ride.canHaveLSM = true;
                         if (ride.meshGenerator.lsmFinGO == null)
@@ -289,7 +312,7 @@ namespace CoasterAnarchy
                         }
 
                     }
-                    if (settings_bool["allowAllSpecialSegments"] == true)
+                    if(settingEnabled("allowAllSpecialSegments"))
                     {
                         foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
                         {
@@ -299,7 +322,7 @@ namespace CoasterAnarchy
                             }
                         }
                     }
-                    if (settings_bool["allowAllTrains"] == true) {
+                    if(settingEnabled("allowAllTrains")) {
                         ride.carTypes = ride.carTypes.Union(carTypes).ToArray();
                     }
                 }
@@ -376,11 +399,32 @@ namespace CoasterAnarchy
             GUILayout.BeginVertical();
             GUILayout.Label("Version", labelStyle, GUILayout.Height(30));
             GUILayout.Label("Changed settings only apply to newly build rides\nUnless the game is saved and reloaded.", labelStyle, GUILayout.Height(30));
-            foreach (KeyValuePair<string, object> S in anarchy_settings)
+            if (ismultiplayer)
             {
-                if (S.Key != "version")
+                foreach (KeyValuePair<string, object> S in anarchy_settings)
                 {
-                    GUILayout.Label(anarchy_strings.ContainsKey(S.Key) ? anarchy_strings[S.Key].ToString() : S.Key, labelStyle, GUILayout.Height(30));
+                    if (S.Key != "version" && !syncedsettings.Contains(S.Key))
+                    {
+                        GUILayout.Label(anarchy_strings.ContainsKey(S.Key) ? anarchy_strings[S.Key].ToString() : S.Key, labelStyle, GUILayout.Height(30));
+                    }
+                }
+                GUILayout.Label("The following settings cannot be changed and are always enabled in multiplayer.", labelStyle, GUILayout.Height(30));
+                foreach (KeyValuePair<string, object> S in anarchy_settings)
+                {
+                    if (syncedsettings.Contains(S.Key))
+                    {
+                        GUILayout.Label(anarchy_strings.ContainsKey(S.Key) ? anarchy_strings[S.Key].ToString() : S.Key, labelStyle, GUILayout.Height(30));
+                    }
+                }
+            }
+            else
+            {
+                foreach (KeyValuePair<string, object> S in anarchy_settings)
+                {
+                    if (S.Key != "version")
+                    {
+                        GUILayout.Label(anarchy_strings.ContainsKey(S.Key) ? anarchy_strings[S.Key].ToString() : S.Key, labelStyle, GUILayout.Height(30));
+                    }
                 }
             }
             GUILayout.EndVertical();
@@ -388,18 +432,56 @@ namespace CoasterAnarchy
             GUILayout.BeginVertical();
             GUILayout.Label(getVersionNumber(), displayStyle, GUILayout.Height(30));
             GUILayout.Label(" \n ", displayStyle, GUILayout.Height(30));
-            foreach (KeyValuePair<string, object> S in anarchy_settings)
+            if(ismultiplayer)
             {
-                type = S.Value.GetType();
-                if (S.Key != "version")
+                foreach (KeyValuePair<string, object> S in anarchy_settings)
                 {
-                    if (type == typeof(bool))
+                    type = S.Value.GetType();
+                    if (S.Key != "version" && !syncedsettings.Contains(S.Key))
                     {
-                        settings_bool[S.Key] = GUILayout.Toggle(settings_bool[S.Key], "", toggleStyle, GUILayout.Width(16), GUILayout.Height(20.5f));
+                        if (type == typeof(bool))
+                        {
+                            settings_bool[S.Key] = GUILayout.Toggle(settings_bool[S.Key], "", toggleStyle, GUILayout.Width(16), GUILayout.Height(20.5f));
+                        }
+                        else
+                        {
+                            settings_string[S.Key] = GUILayout.TextField(settings_string[S.Key], textfieldStyle, GUILayout.Width(130), GUILayout.Height(30));
+                        }
                     }
-                    else
+                }
+                GUILayout.Label(" \n ", displayStyle, GUILayout.Height(30));
+                foreach (KeyValuePair<string, object> S in anarchy_settings)
+                {
+                    type = S.Value.GetType();
+                    if (S.Key != "version" && syncedsettings.Contains(S.Key))
                     {
-                        settings_string[S.Key] = GUILayout.TextField(settings_string[S.Key], textfieldStyle, GUILayout.Width(130), GUILayout.Height(30));
+                        if (type == typeof(bool))
+                        {
+                            GUILayout.Label((settings_bool[S.Key] ? "Enabled" : "Disabled"), displayStyle, GUILayout.Height(30));
+                        }
+                        else
+                        {
+                            GUILayout.Label(settings_string[S.Key], displayStyle, GUILayout.Height(30));
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                foreach (KeyValuePair<string, object> S in anarchy_settings)
+                {
+                    type = S.Value.GetType();
+                    if (S.Key != "version")
+                    {
+                        if (type == typeof(bool))
+                        {
+                            settings_bool[S.Key] = GUILayout.Toggle(settings_bool[S.Key], "", toggleStyle, GUILayout.Width(16), GUILayout.Height(20.5f));
+                        }
+                        else
+                        {
+                            settings_string[S.Key] = GUILayout.TextField(settings_string[S.Key], textfieldStyle, GUILayout.Width(130), GUILayout.Height(30));
+                        }
                     }
                 }
             }
@@ -563,7 +645,7 @@ namespace CoasterAnarchy
 
         public override bool isMultiplayerModeCompatible() { return true; }
 
-        public override bool isRequiredByAllPlayersInMultiplayerMode() { return false; }
+        public override bool isRequiredByAllPlayersInMultiplayerMode() { return true; }
 
         public override int getOrderPriority() { return 9999; }
 
