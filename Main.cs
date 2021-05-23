@@ -15,8 +15,8 @@ namespace CoasterAnarchy
         Dictionary<string, List<SpecialSegmentSettings>> originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
         private StreamWriter sw;
         private int i;
-        private double settingsVersion = 1.1;
-        private double dictionaryVersion = 1.1;
+        private double settingsVersion = 1.2;
+        private double dictionaryVersion = 1.2;
         public Dictionary<string, object> anarchy_settings;
         public Dictionary<string, object> anarchy_strings;
         public Dictionary<string, string> settings_string = new Dictionary<string, string>();
@@ -325,6 +325,14 @@ namespace CoasterAnarchy
                     if(settingEnabled("allowAllTrains")) {
                         ride.carTypes = ride.carTypes.Union(carTypes).ToArray();
                     }
+                    if(settingEnabled("allowLongTrains"))
+                    {
+                        foreach (CoasterCarInstantiator carType in ride.carTypes)
+                        {
+                            carType.minTrainLength = 1;
+                            carType.maxTrainLength = 255;
+                        }
+                    }
                 }
             }
         }
@@ -550,6 +558,7 @@ namespace CoasterAnarchy
                 sw.WriteLine("	\"version\": " + settingsVersion.ToString().Replace(",", ".") + (int.TryParse(settingsVersion.ToString(), out result) ? ".0" : "") + ",");
                 sw.WriteLine("	\"allowAllSpecialSegments\": true,");
                 sw.WriteLine("	\"allowAllTrains\": true,");
+                sw.WriteLine("	\"allowLongTrains\": true,");
                 sw.WriteLine("	\"noBuildRestrictions\": true,");
                 sw.WriteLine("	\"allowLSM\": true,");
                 sw.WriteLine("	\"allowBanking\": true,");
@@ -596,6 +605,7 @@ namespace CoasterAnarchy
                 sw.WriteLine("{");
                 sw.WriteLine("	\"version\": " + dictionaryVersion.ToString().Replace(",", ".") + (int.TryParse(dictionaryVersion.ToString(), out result) ? ".0" : "") + ",");
                 sw.WriteLine("	\"allowAllTrains\": \"Allow all vehicles\",");
+                sw.WriteLine("	\"allowLongTrains\": \"Allow trains of any length\",");
                 sw.WriteLine("	\"allowAllSpecialSegments\": \"Allow all special track pieces\",");
                 sw.WriteLine("	\"allowLSM\": \"Allow LSM launches\",");
                 sw.WriteLine("	\"allowBanking\": \"Allow full banking\",");
@@ -641,7 +651,7 @@ namespace CoasterAnarchy
 
         public override string getIdentifier() { return "Marnit@ParkitectCoasterAnarchy"; }
 
-        public override string getVersionNumber() { return "2.3.0"; }
+        public override string getVersionNumber() { return "2.4.0"; }
 
         public override bool isMultiplayerModeCompatible() { return true; }
 
