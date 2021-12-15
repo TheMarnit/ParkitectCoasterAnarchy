@@ -16,7 +16,7 @@ namespace CoasterAnarchy
         private StreamWriter sw;
         private int i;
         private double settingsVersion = 1.2;
-        private double dictionaryVersion = 1.2;
+        private double dictionaryVersion = 1.3;
         public Dictionary<string, object> anarchy_settings;
         public Dictionary<string, object> anarchy_strings;
         public Dictionary<string, string> settings_string = new Dictionary<string, string>();
@@ -180,7 +180,14 @@ namespace CoasterAnarchy
                 return true;
             }
             else {
-                return settings_bool[name];
+                if (settings_bool.ContainsKey(name))
+                {
+                    return settings_bool[name];
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
@@ -189,6 +196,10 @@ namespace CoasterAnarchy
             if (settingEnabled("noBuildRestrictions"))
             {
                 Global.NO_TRACKBUILDER_RESTRICTIONS = true;
+            }
+            if(settingEnabled("allowBrokenStuff_NO_WARRANTY") && !ismultiplayer)
+            {
+                Global.ALLOW_IMPOSSIBLE_TRACKBUILDER_SEGMENTS = true;
             }
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
@@ -340,6 +351,7 @@ namespace CoasterAnarchy
         public void revertAllSettings()
         {
             Global.NO_TRACKBUILDER_RESTRICTIONS = false;
+            Global.ALLOW_IMPOSSIBLE_TRACKBUILDER_SEGMENTS = false;
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
                 var ride = current as TrackedRide;
@@ -635,6 +647,7 @@ namespace CoasterAnarchy
                 sw.WriteLine("	\"allowDeltaHeight\": \"Allow tight slope transitions\",");
                 sw.WriteLine("	\"allowVerticalCurve\": \"Allow turns on vertical track\",");
                 sw.WriteLine("	\"allowVerticalDirectionSwap\": \"Allow vertical direction toggle\",");
+                sw.WriteLine("	\"allowBrokenStuff_NO_WARRANTY\": \"Allow horribly broken elements,\ndisable this before reporting bugs.\",");
                 sw.WriteLine("}");
                 sw.Flush();
                 sw.Close();
@@ -651,7 +664,7 @@ namespace CoasterAnarchy
 
         public override string getIdentifier() { return "Marnit@ParkitectCoasterAnarchy"; }
 
-        public override string getVersionNumber() { return "2.4.0"; }
+        public override string getVersionNumber() { return "2.4.2"; }
 
         public override bool isMultiplayerModeCompatible() { return true; }
 
