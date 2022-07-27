@@ -541,6 +541,20 @@ namespace CoasterAnarchy
 
         public void onSettingsClosed()
         {
+            if (settings_bool.Count > 0)
+            {
+                foreach (KeyValuePair<string, bool> S in settings_bool)
+                {
+                    anarchy_settings[S.Key] = S.Value;
+                }
+            }
+            if (settings_string.Count > 0)
+            {
+                foreach (KeyValuePair<string, string> S in settings_string)
+                {
+                    anarchy_settings[S.Key] = S.Value;
+                }
+            }
             generateSettingsFile();
             if (isenabled)
             {
