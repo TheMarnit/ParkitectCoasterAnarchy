@@ -170,6 +170,8 @@ namespace CoasterAnarchy
                     originalRide.canInvertSlopes = ride.canInvertSlopes;
                     originalRide.canChangeCarRotation = ride.canChangeCarRotation;
                     originalRide.everyUpIsLift = ride.everyUpIsLift;
+                    originalRide.canRunInShuttleMode = ride.canRunInShuttleMode;
+                    originalRide.canOnlyPlaceOnWater = ride.canOnlyPlaceOnWater;
                     originalRide.maxBankingAngle = ride.maxBankingAngle;
                     originalRide.maxDeltaHeightDown = ride.maxDeltaHeightDown;
                     originalRide.maxDeltaHeightForLift = ride.maxDeltaHeightForLift;
@@ -345,6 +347,15 @@ namespace CoasterAnarchy
                     }
                     if(settingEnabled("allowAllSpecialSegments"))
                     {
+                        if(DLC2_Installed)
+                        {
+                            ride.meshGenerator.customColors = new[] {
+                                ride.meshGenerator.customColors.Length > 0?ride.meshGenerator.customColors[0]:new Color(0, 0, 0),
+                                ride.meshGenerator.customColors.Length > 1?ride.meshGenerator.customColors[1]:new Color(0, 0, 0),
+                                ride.meshGenerator.customColors.Length > 2?ride.meshGenerator.customColors[2]:new Color(0, 0, 0),
+                                ride.meshGenerator.customColors.Length > 3?ride.meshGenerator.customColors[3]:new Color(0, 0, 0)
+                            };
+                        }
                         foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
                         {
                             if (segment.name != "Splashdown" && segment.name != "HydraulicLaunchSystem")
@@ -367,6 +378,14 @@ namespace CoasterAnarchy
                     if(settingEnabled("removeStationHandrails"))
                     {
                         ride.meshGenerator.stationHandRailGO = null;
+                    }
+                    if (settingEnabled("allowShuttleMode"))
+                    {
+                        ride.canRunInShuttleMode = true;
+                    }
+                    if (settingEnabled("allowWaterRidesAnywhere"))
+                    {
+                        ride.canOnlyPlaceOnWater = false;
                     }
                 }
             }
@@ -410,6 +429,8 @@ namespace CoasterAnarchy
                     ride.canBuildSlopeTransitionBrakes = originalSettings[ride.getUnlocalizedName()].canBuildSlopeTransitionBrakes;
                     ride.maxSegmentWidth = originalSettings[ride.getUnlocalizedName()].maxSegmentWidth;
                     ride.canChangeDirectionAngle = originalSettings[ride.getUnlocalizedName()].canChangeDirectionAngle;
+                    ride.canRunInShuttleMode = originalSettings[ride.getUnlocalizedName()].canRunInShuttleMode;
+                    ride.canOnlyPlaceOnWater = originalSettings[ride.getUnlocalizedName()].canOnlyPlaceOnWater;
                     ride.meshGenerator.lsmFinGO = originalObjects[ride.getUnlocalizedName()]["lsmFinGO"];
                     ride.meshGenerator.stationHandRailGO = originalObjects[ride.getUnlocalizedName()]["stationHandRailGO"];
                     foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
@@ -607,7 +628,9 @@ namespace CoasterAnarchy
                 writeSettingLine(sw, "allowMagnetickKickers", typeof(bool), true, DLC1_Installed);
                 writeSettingLine(sw, "allowSpinLock", typeof(bool), true);
                 writeSettingLine(sw, "allowCarRotation", typeof(bool), true);
+                writeSettingLine(sw, "allowShuttleMode", typeof(bool), true);
                 writeSettingLine(sw, "allowLiftHills", typeof(bool), true);
+                writeSettingLine(sw, "allowWaterRidesAnywhere", typeof(bool), false);
                 writeSettingLine(sw, "changeSegmentWidth", typeof(bool), true, DLC1_Installed);
                 writeSettingLine(sw, "segmentWidth", typeof(string), "10", DLC1_Installed);
                 writeSettingLine(sw, "removeStationHandrails", typeof(bool), false);
@@ -687,6 +710,8 @@ namespace CoasterAnarchy
                 writeDictionaryLine(sw, "allowDeltaHeight", "Allow tight slope transitions");
                 writeDictionaryLine(sw, "allowVerticalCurve", "Allow turns on vertical track");
                 writeDictionaryLine(sw, "allowVerticalDirectionSwap", "Allow vertical direction toggle", DLC1_Installed);
+                writeDictionaryLine(sw, "allowShuttleMode", "Allow shuttle mode operations");
+                writeDictionaryLine(sw, "allowWaterRidesAnywhere", "Allow water rides to be built anywhere");
                 writeDictionaryLine(sw, "removeStationHandrails", "Remove handrails from station platforms");
                 writeDictionaryLine(sw, "allowBrokenStuff_NO_WARRANTY", "Allow horribly broken elements,\ndisable this before reporting bugs.");
                 sw.WriteLine("}");
