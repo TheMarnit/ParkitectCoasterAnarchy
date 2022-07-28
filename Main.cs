@@ -14,8 +14,8 @@ namespace CoasterAnarchy
         Dictionary<string, TrackedRide> originalSettings = new Dictionary<string, TrackedRide>();
         Dictionary<string, List<SpecialSegmentSettings>> originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
         Dictionary<string, Dictionary<string, GameObject>> originalObjects = new Dictionary<string, Dictionary<string, GameObject>>();
+        Dictionary<string, Color[]> originalColors = new Dictionary<string, Color[]>();
         private StreamWriter sw;
-        private int i;
         private double settingsVersion = 1.3;
         private double dictionaryVersion = 1.4;
         public Dictionary<string, object> anarchy_settings;
@@ -28,8 +28,6 @@ namespace CoasterAnarchy
         private bool ismultiplayer = false;
         public CoasterCarInstantiator[] carTypes = { };
         GameObject lsmFin;
-        bool DLC1_Installed;
-        bool DLC2_Installed;
         private List<string> syncedsettings = new List<string> {
             "allowDeltaHeight",
             "allowTightHelix",
@@ -64,6 +62,7 @@ namespace CoasterAnarchy
             }
             else
             {
+                anarchy_settings = new Dictionary<string, object>();
                 generateSettingsFile();
                 anarchy_settings = Json.Deserialize(File.ReadAllText(Path + @"/coasteranarchy.settings.json")) as Dictionary<string, object>;
             }
@@ -77,6 +76,7 @@ namespace CoasterAnarchy
             }
             else
             {
+                anarchy_strings = new Dictionary<string, object>();
                 generateDictionaryFile();
                 anarchy_strings = Json.Deserialize(File.ReadAllText(Path + @"/coasteranarchy.dictionary.json")) as Dictionary<string, object>;
             }
@@ -109,8 +109,6 @@ namespace CoasterAnarchy
 
         public override void onEnabled()
         {
-            DLC1_Installed = TrackRideHelper.GetTrackedRide("Vertical Spinning Coaster") != null;
-            DLC2_Installed = TrackRideHelper.GetTrackedRide("Pivot Coaster") != null;
             ismultiplayer = CommandController.Instance.isInMultiplayerMode();
             enable(null, null);
         }
@@ -133,6 +131,7 @@ namespace CoasterAnarchy
             originalSettings = new Dictionary<string, TrackedRide>();
             originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
             originalObjects = new Dictionary<string, Dictionary<string, GameObject>>();
+            originalColors = new Dictionary<string, Color[]>();
             lsmFin = TrackRideHelper.GetTrackedRide("Floorless Coaster").meshGenerator.lsmFinGO;
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
             {
@@ -193,6 +192,7 @@ namespace CoasterAnarchy
                     originalRide.carTypes = ride.carTypes;
                     originalSettings.Add(ride.getUnlocalizedName(), originalRide);
                     originalSegments.Add(ride.getUnlocalizedName(), originalSpecialSegments);
+                    originalColors.Add(ride.getUnlocalizedName(), ride.meshGenerator.customColors);
                 }
             }
         }
@@ -316,7 +316,7 @@ namespace CoasterAnarchy
                     {
                         ride.canChangeSpinLock = true;
                     }
-                    if(settingEnabled("allowMagnetickKickers"))
+                    if(settingEnabled("allowMagneticKickers"))
                     {
                         ride.canBuildMagneticKickers = true;
                     }
@@ -347,7 +347,8 @@ namespace CoasterAnarchy
                     }
                     if(settingEnabled("allowAllSpecialSegments"))
                     {
-                        if(DLC2_Installed)
+                        ride.meshGenerator.elevatorTunnelMeshGenerator = TrackRideHelper.GetTrackedRide("Spinning Coaster").meshGenerator.elevatorTunnelMeshGenerator;
+                        if(TrackRideHelper.GetTrackedRide("Tilt Coaster") != null)
                         {
                             ride.meshGenerator.customColors = new[] {
                                 ride.meshGenerator.customColors.Length > 0?ride.meshGenerator.customColors[0]:new Color(0, 0, 0),
@@ -433,6 +434,7 @@ namespace CoasterAnarchy
                     ride.canOnlyPlaceOnWater = originalSettings[ride.getUnlocalizedName()].canOnlyPlaceOnWater;
                     ride.meshGenerator.lsmFinGO = originalObjects[ride.getUnlocalizedName()]["lsmFinGO"];
                     ride.meshGenerator.stationHandRailGO = originalObjects[ride.getUnlocalizedName()]["stationHandRailGO"];
+                    ride.meshGenerator.customColors = originalColors[ride.getUnlocalizedName()];
                     foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
                     {
                         ride.specialSegments.removeSpecialSegment(segment);
@@ -614,7 +616,7 @@ namespace CoasterAnarchy
                 writeSettingLine(sw, "allowCurvedLifts", typeof(bool), true);
                 writeSettingLine(sw, "changeLiftSpeedLimit", typeof(bool), true);
                 writeSettingLine(sw, "liftSpeedLimit", typeof(string), "100");
-                writeSettingLine(sw, "allowVerticalDirectionSwap", typeof(bool), true, DLC1_Installed);
+                writeSettingLine(sw, "allowVerticalDirectionSwap", typeof(bool), true);
                 writeSettingLine(sw, "allowLapsChange", typeof(bool), true);
                 writeSettingLine(sw, "allowTrackCrests", typeof(bool), true);
                 writeSettingLine(sw, "unlimitedHeight", typeof(bool), true);
@@ -624,33 +626,40 @@ namespace CoasterAnarchy
                 writeSettingLine(sw, "allowHoldingBrakes", typeof(bool), true);
                 writeSettingLine(sw, "allowBrakes", typeof(bool), true);
                 writeSettingLine(sw, "allowTightHelix", typeof(bool), true);
-                writeSettingLine(sw, "allowRideCamera", typeof(bool), true, DLC1_Installed);
-                writeSettingLine(sw, "allowMagnetickKickers", typeof(bool), true, DLC1_Installed);
+                writeSettingLine(sw, "allowRideCamera", typeof(bool), true);
+                writeSettingLine(sw, "allowMagneticKickers", typeof(bool), true);
                 writeSettingLine(sw, "allowSpinLock", typeof(bool), true);
                 writeSettingLine(sw, "allowCarRotation", typeof(bool), true);
                 writeSettingLine(sw, "allowShuttleMode", typeof(bool), true);
                 writeSettingLine(sw, "allowLiftHills", typeof(bool), true);
-                writeSettingLine(sw, "allowWaterRidesAnywhere", typeof(bool), false);
-                writeSettingLine(sw, "changeSegmentWidth", typeof(bool), true, DLC1_Installed);
-                writeSettingLine(sw, "segmentWidth", typeof(string), "10", DLC1_Installed);
+                // writeSettingLine(sw, "allowWaterRidesAnywhere", typeof(bool), false);
+                // Isn't being used
+                writeSettingLine(sw, "changeSegmentWidth", typeof(bool), true);
+                writeSettingLine(sw, "segmentWidth", typeof(string), "10");
                 writeSettingLine(sw, "removeStationHandrails", typeof(bool), false);
                 if (anarchy_settings.ContainsKey("allowBrokenStuff_NO_WARRANTY"))
                 {
                     writeSettingLine(sw, "allowBrokenStuff_NO_WARRANTY", typeof(bool), false);
                 }
                 sw.WriteLine("}");
-                sw.Flush();
-                sw.Close();
             }
             catch
             {
                 Debug.LogError("Failed writing to: " + Path + @"/coasteranarchy.settings.json");
             }
+            finally
+            {
+                if (sw != null)
+                {
+                    sw.Flush();
+                    sw.Close();
+                }
+            }
         }
 
-        public void writeSettingLine(StreamWriter sw, string setting, Type type, object defaultValue, bool requiredValue = true)
+        public void writeSettingLine(StreamWriter sw, string setting, Type type, object defaultValue)
         {
-            if (requiredValue)
+            try
             {
                 if (type == typeof(string))
                 {
@@ -660,6 +669,10 @@ namespace CoasterAnarchy
                 {
                     sw.WriteLine("	\"" + setting + "\": " + (anarchy_settings.ContainsKey(setting) ? anarchy_settings[setting].ToString().ToLower() : defaultValue.ToString().ToLower()) + ",");
                 }
+            }
+            catch
+            {
+                Debug.LogError("Failed writing setting: " + setting);
             }
         }
 
@@ -684,9 +697,9 @@ namespace CoasterAnarchy
                 writeDictionaryLine(sw, "allowAllSpecialSegments", "Allow all special track pieces");
                 writeDictionaryLine(sw, "allowLSM", "Allow LSM launches");
                 writeDictionaryLine(sw, "allowBanking", "Allow full banking");
-                writeDictionaryLine(sw, "allowRideCamera", "Allow camera", DLC1_Installed);
+                writeDictionaryLine(sw, "allowRideCamera", "Allow camera");
                 writeDictionaryLine(sw, "allowSpinLock", "Allow spin toggle");
-                writeDictionaryLine(sw, "allowMagnetickKickers", "Allow magnetic kickers", DLC1_Installed);
+                writeDictionaryLine(sw, "allowMagneticKickers", "Allow magnetic kickers");
                 writeDictionaryLine(sw, "allowSlopeTransitionBrakes", "Allow building brakes on slope transitions");
                 writeDictionaryLine(sw, "allowLapsChange", "Allow changing lap count");
                 writeDictionaryLine(sw, "allowCurvedLifts", "Allow curved lift hills");
@@ -697,8 +710,8 @@ namespace CoasterAnarchy
                 writeDictionaryLine(sw, "allowLiftHills", "Allow custom lifthill placement on water rides");
                 writeDictionaryLine(sw, "changeLiftSpeedLimit", "Overwrite lift speed limit");
                 writeDictionaryLine(sw, "liftSpeedLimit", "Lift speed limit");
-                writeDictionaryLine(sw, "changeSegmentWidth", "Overwrite maximum track width", DLC1_Installed);
-                writeDictionaryLine(sw, "segmentWidth", "Maximum track width", DLC1_Installed);
+                writeDictionaryLine(sw, "changeSegmentWidth", "Overwrite maximum track width");
+                writeDictionaryLine(sw, "segmentWidth", "Maximum track width");
                 writeDictionaryLine(sw, "allowCurvedSlopes", "Allow curved slopes");
                 writeDictionaryLine(sw, "allowBrakes", "Allow friction and block brakes");
                 writeDictionaryLine(sw, "allowTrackCrests", "Allow building drops directly from hills");
@@ -709,26 +722,36 @@ namespace CoasterAnarchy
                 writeDictionaryLine(sw, "noBuildRestrictions", "Allow building \\\"invalid\\\" pieces");
                 writeDictionaryLine(sw, "allowDeltaHeight", "Allow tight slope transitions");
                 writeDictionaryLine(sw, "allowVerticalCurve", "Allow turns on vertical track");
-                writeDictionaryLine(sw, "allowVerticalDirectionSwap", "Allow vertical direction toggle", DLC1_Installed);
+                writeDictionaryLine(sw, "allowVerticalDirectionSwap", "Allow vertical direction toggle");
                 writeDictionaryLine(sw, "allowShuttleMode", "Allow shuttle mode operations");
                 writeDictionaryLine(sw, "allowWaterRidesAnywhere", "Allow water rides to be built anywhere");
                 writeDictionaryLine(sw, "removeStationHandrails", "Remove handrails from station platforms");
                 writeDictionaryLine(sw, "allowBrokenStuff_NO_WARRANTY", "Allow horribly broken elements,\ndisable this before reporting bugs.");
                 sw.WriteLine("}");
-                sw.Flush();
-                sw.Close();
             }
             catch
             {
                 Debug.LogError("Failed writing to: " + Path + @"/coasteranarchy.dictionary.json");
             }
+            finally
+            {
+                if (sw != null)
+                {
+                    sw.Flush();
+                    sw.Close();
+                }
+            }
         }
 
-        public void writeDictionaryLine(StreamWriter sw, string setting, string defaultValue, bool requiredValue = true)
+        public void writeDictionaryLine(StreamWriter sw, string setting, string defaultValue)
         {
-            if (requiredValue)
+            try
             {
                 sw.WriteLine("	\"" + setting + "\": \"" + (anarchy_strings.ContainsKey(setting) ? anarchy_strings[setting] : defaultValue) + "\",");
+            }
+            catch
+            {
+                Debug.LogError("Failed writing dictionary entry: " + setting);
             }
         }
 
