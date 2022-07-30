@@ -630,7 +630,7 @@ namespace CoasterAnarchy
                 writeSettingLine(sw, "allowMagneticKickers", typeof(bool), true);
                 writeSettingLine(sw, "allowSpinLock", typeof(bool), true);
                 writeSettingLine(sw, "allowCarRotation", typeof(bool), true);
-                writeSettingLine(sw, "allowShuttleMode", typeof(bool), true);
+                writeSettingLine(sw, "allowShuttleMode", typeof(bool), false);
                 writeSettingLine(sw, "allowLiftHills", typeof(bool), true);
                 // writeSettingLine(sw, "allowWaterRidesAnywhere", typeof(bool), false);
                 // Isn't being used
@@ -761,7 +761,7 @@ namespace CoasterAnarchy
 
         public override string getIdentifier() { return "Marnit@ParkitectCoasterAnarchy"; }
 
-        public override string getVersionNumber() { return "2.5.0"; }
+        public override string getVersionNumber() { return "2.5.1"; }
 
         public override bool isMultiplayerModeCompatible() { return true; }
 
