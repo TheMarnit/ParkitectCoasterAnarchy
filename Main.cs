@@ -14,10 +14,11 @@ namespace CoasterAnarchy
         Dictionary<string, TrackedRide> originalSettings = new Dictionary<string, TrackedRide>();
         Dictionary<string, List<SpecialSegmentSettings>> originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
         Dictionary<string, Dictionary<string, GameObject>> originalObjects = new Dictionary<string, Dictionary<string, GameObject>>();
+        Dictionary<string, Dictionary<string, bool>> originalBooleans = new Dictionary<string, Dictionary<string, bool>>();
         Dictionary<string, Color[]> originalColors = new Dictionary<string, Color[]>();
         private StreamWriter sw;
-        private double settingsVersion = 1.3;
-        private double dictionaryVersion = 1.4;
+        private double settingsVersion = 1.4;
+        private double dictionaryVersion = 1.5;
         public Dictionary<string, object> anarchy_settings;
         public Dictionary<string, object> anarchy_strings;
         public Dictionary<string, string> settings_string = new Dictionary<string, string>();
@@ -131,6 +132,7 @@ namespace CoasterAnarchy
             originalSettings = new Dictionary<string, TrackedRide>();
             originalSegments = new Dictionary<string, List<SpecialSegmentSettings>>();
             originalObjects = new Dictionary<string, Dictionary<string, GameObject>>();
+            originalBooleans = new Dictionary<string, Dictionary<string, bool>>();
             originalColors = new Dictionary<string, Color[]>();
             lsmFin = TrackRideHelper.GetTrackedRide("Floorless Coaster").meshGenerator.lsmFinGO;
             foreach (Attraction current in ScriptableSingleton<AssetManager>.Instance.getAttractionObjects())
@@ -148,8 +150,10 @@ namespace CoasterAnarchy
                 if (ride != null)
                 {
                     originalObjects[ride.getUnlocalizedName()] = new Dictionary<string, GameObject>();
+                    originalBooleans[ride.getUnlocalizedName()] = new Dictionary<string, bool>();
                     originalObjects[ride.getUnlocalizedName()]["stationHandRailGO"] = ride.meshGenerator.stationHandRailGO;
                     originalObjects[ride.getUnlocalizedName()]["lsmFinGO"] = ride.meshGenerator.lsmFinGO;
+                    originalBooleans[ride.getUnlocalizedName()]["allowInlineEntranceExitPlacement"] = ride.meshGenerator.stationPlatformGO.allowInlineEntranceExitPlacement;
                     originalRide.meshGenerator = ride.meshGenerator;
                     originalRide.canBuildRideCamera = ride.canBuildRideCamera;
                     originalRide.canChangeSpinLock = ride.canChangeSpinLock;
@@ -376,9 +380,13 @@ namespace CoasterAnarchy
                             carType.maxTrainLength = 255;
                         }
                     }
-                    if(settingEnabled("removeStationHandrails"))
+                    if (settingEnabled("removeStationHandrails"))
                     {
                         ride.meshGenerator.stationHandRailGO = null;
+                    }
+                    if (settingEnabled("allowInlinePlatforms"))
+                    {
+                        ride.meshGenerator.stationPlatformGO.allowInlineEntranceExitPlacement = true;
                     }
                     if (settingEnabled("allowShuttleMode"))
                     {
@@ -434,6 +442,7 @@ namespace CoasterAnarchy
                     ride.canOnlyPlaceOnWater = originalSettings[ride.getUnlocalizedName()].canOnlyPlaceOnWater;
                     ride.meshGenerator.lsmFinGO = originalObjects[ride.getUnlocalizedName()]["lsmFinGO"];
                     ride.meshGenerator.stationHandRailGO = originalObjects[ride.getUnlocalizedName()]["stationHandRailGO"];
+                    ride.meshGenerator.stationPlatformGO.allowInlineEntranceExitPlacement = originalBooleans[ride.getUnlocalizedName()]["allowInlineEntranceExitPlacement"];
                     ride.meshGenerator.customColors = originalColors[ride.getUnlocalizedName()];
                     foreach (SpecialSegmentSettings segment in ScriptableSingleton<AssetManager>.Instance.specialSegments)
                     {
@@ -637,6 +646,7 @@ namespace CoasterAnarchy
                 writeSettingLine(sw, "changeSegmentWidth", typeof(bool), true);
                 writeSettingLine(sw, "segmentWidth", typeof(string), "10");
                 writeSettingLine(sw, "removeStationHandrails", typeof(bool), false);
+                writeSettingLine(sw, "allowInlinePlatforms", typeof(bool), true);
                 if (anarchy_settings.ContainsKey("allowBrokenStuff_NO_WARRANTY"))
                 {
                     writeSettingLine(sw, "allowBrokenStuff_NO_WARRANTY", typeof(bool), false);
@@ -725,6 +735,7 @@ namespace CoasterAnarchy
                 writeDictionaryLine(sw, "allowVerticalDirectionSwap", "Allow vertical direction toggle");
                 writeDictionaryLine(sw, "allowShuttleMode", "Allow shuttle mode operations");
                 writeDictionaryLine(sw, "allowWaterRidesAnywhere", "Allow water rides to be built anywhere");
+                writeDictionaryLine(sw, "allowInlinePlatforms", "Allow platform entrances to be built on all sides");
                 writeDictionaryLine(sw, "removeStationHandrails", "Remove handrails from station platforms");
                 writeDictionaryLine(sw, "allowBrokenStuff_NO_WARRANTY", "Allow horribly broken elements,\ndisable this before reporting bugs.");
                 sw.WriteLine("}");
@@ -761,7 +772,7 @@ namespace CoasterAnarchy
 
         public override string getIdentifier() { return "Marnit@ParkitectCoasterAnarchy"; }
 
-        public override string getVersionNumber() { return "2.5.1"; }
+        public override string getVersionNumber() { return "2.6.0"; }
 
         public override bool isMultiplayerModeCompatible() { return true; }
 
